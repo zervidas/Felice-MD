@@ -1,5 +1,6 @@
 require("./config.js")
 const fs = require("fs")
+const Handler = require('./handler.js')
 
 const {
     getGroupAdmins,
@@ -30,8 +31,8 @@ module.exports = async (fell, m) => {
         const prefix = prefixRegex.test(body) ? body.match(prefixRegex)[0] : '.';
         const isCmd = body.startsWith(prefix);
         const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : '';
-        const args = body.trim().split(/ +/).slice(1)
-        const text = q = args.join(" ")
+        const args = body.trim().split(/\s+/).slice(1)
+        const text = q = body.slice(prefix.length).trim().slice(command.length).trim();
         const sender = m.key.fromMe ? (fell.user.id.split(':')[0] + '@s.whatsapp.net' || fell.user.id) : (m.key.participant || m.key.remoteJid)
         const botNumber = await fell.decodeJid(fell.user.id)
         const senderNumber = sender.split('@')[0]
@@ -44,7 +45,7 @@ module.exports = async (fell, m) => {
         const isCreator = (m && m.sender && [botNumber, ...global.owner].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)) || false;
 
         const groupMetadata = m.isGroup ? await fell.groupMetadata(m.chat).catch(e => { }) : ''
-        const groupName = m.isGroup ? groupMetadata.subject : ''
+        const groupName = m.isGroup ? groupMetadata?.subject : ''
         const participants = m.isGroup ? await groupMetadata.participants : ''
         const groupAdmins = m.isGroup ? await getGroupAdmins(participants) : ''
         const isBotAdmins = m.isGroup ? groupAdmins.includes(botNumber) : false
@@ -60,6 +61,7 @@ module.exports = async (fell, m) => {
                 break;
 
             default:
+                Handler(m, { fell, body, budy, prefixRegex, prefix, isCmd, command, args, text, sender, botNumber, senderNumber, pushname, isBot, fatkuns, quoted, mime, qmsg, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, groupOwner, isGroupOwner })
                 if (budy.startsWith('=>')) {
                     if (!isCreator) return
                     function Return(sul) {
@@ -71,22 +73,22 @@ module.exports = async (fell, m) => {
                         return m.reply(bang)
                     }
                     try {
-                        m.reply(require('util').format(eval(`(async () => { return ${budy.slice(3)} })()`)))
+                        m.reply(require('util').inspect(await eval(`(async () => { return ${body.slice(2)} })()`)))
                     } catch (e) {
                         m.reply(String(e))
                     }
                 }
 
-                if (budy.startsWith('>')) {
+                if (budy.startsWith('>')) {console.log("eval cuy")
                     if (!isCreator) return
-                    let kode = budy.trim().split(/ +/)[1]
+                    let kode = body.slice(1);
                     let teks
                     try {
-                        teks = /await/i.test(kode) ? eval("(async() => { " + kode + " })()") : eval(kode)
+                        teks = /await/i.test(kode) ? await eval("(async() => { " + kode + " })()") : eval(kode)
                     } catch (e) {
                         teks = e
                     } finally {
-                        await m.reply(require('util').format(teks))
+                        await m.reply(require('util').inspect(teks))
                     }
                 }
 

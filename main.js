@@ -45,9 +45,8 @@ async function start() {
             mek.message = Object.keys(mek.message)[0] === "ephemeralMessage" ? mek.message.ephemeralMessage.message : mek.message;
             if (mek.key && mek.key.remoteJid === "status@broadcast") return;
             if (!fell.public && !mek.key.fromMe && chatUpdate.type === "notify") return;
-            if (mek.key.id.startsWith("BAE5") && mek.key.id.length === 16) return;
             m = smsg(fell, mek, store);
-            require("./command.js")(fell, m, chatUpdate, store);
+            require("./case.js")(fell, m, chatUpdate, store);
         } catch (err) {
             console.log(err);
         }
