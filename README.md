@@ -40,7 +40,7 @@ Terima kasih!
 
 # FELICE-MD
 
-Base Bot WhatsApp (Case)
+Base Bot WhatsApp (Case & plugin [cjs, esm, ts])
 
 ---
 
